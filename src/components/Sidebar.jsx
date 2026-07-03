@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 const menu = [
   { id: "dashboard", label: "Dashboard" },
   { id: "optimization", label: "Otimização" },
@@ -10,7 +12,34 @@ const menu = [
   { id: "settings", label: "Configurações" }
 ];
 
+const emptyDiscordUser = {
+  connected: false,
+  username: "Guedes",
+  avatar: null
+};
+
 export default function Sidebar({ activePage, setPage }) {
+  const [version, setVersion] = useState("...");
+  const [discordUser, setDiscordUser] = useState(() => {
+    const saved = localStorage.getItem("discordUser");
+    return saved ? JSON.parse(saved) : emptyDiscordUser;
+  });
+
+  useEffect(() => {
+    window.optimizer.getAppVersion().then(setVersion);
+
+    function updateUser() {
+      const saved = localStorage.getItem("discordUser");
+      setDiscordUser(saved ? JSON.parse(saved) : emptyDiscordUser);
+    }
+
+    window.addEventListener("discord-user-updated", updateUser);
+
+    return () => {
+      window.removeEventListener("discord-user-updated", updateUser);
+    };
+  }, []);
+
   return (
     <aside className="sidebar">
       <div>
@@ -36,10 +65,23 @@ export default function Sidebar({ activePage, setPage }) {
         </nav>
       </div>
 
-      <div className="licenseBox">
-        <span>Plano</span>
-        <strong>Premium</strong>
-        <small>Licença ativa</small>
+      <div className="licenseBox profileLicenseBox">
+        <div className="profileAvatarRing">
+          <div className="profileAvatar">
+            {discordUser.avatar ? (
+              <img src={discordUser.avatar} alt="Avatar Discord" />
+            ) : (
+              "G"
+            )}
+          </div>
+        </div>
+
+        <div className="profileInfo">
+          <span>{discordUser.username}</span>
+          <strong>Premium</strong>
+          <small>Licença ativa</small>
+          <small>Versão {version}</small>
+        </div>
       </div>
     </aside>
   );

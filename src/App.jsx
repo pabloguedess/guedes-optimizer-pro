@@ -185,7 +185,7 @@ if (data?.status === "silent-error") return;
       network: <Network {...sharedProps} />,
       gpu: <GPU {...sharedProps} />,
       live: <LiveMode {...sharedProps} />,
-      account: <Account />,
+      account: <Account notify={notify} />,
       settings: (
         <Settings
           accentColor={accentColor}

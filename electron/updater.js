@@ -8,7 +8,9 @@ const changelog = [
   "Verificação automática ao abrir o app",
   "Download em segundo plano",
   "Botão Reiniciar Agora corrigido",
-  "Melhor integração com a interface"
+  "Melhor integração com a interface",
+  "Adição de logs de atualização no painel de controle",
+  "Possivel conexão com Discord para notificações de atualização",
 ];
 
 function send(data) {

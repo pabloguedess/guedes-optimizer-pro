@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld("optimizer", {
   setStartup: (enable) => ipcRenderer.invoke("set-startup", enable),
   setMonitorActive: (active) => ipcRenderer.invoke("set-monitor-active", active),
 
+  connectDiscord: () => ipcRenderer.invoke("connect-discord"),
+
   cleanTemp: () => ipcRenderer.invoke("clean-temp"),
   cleanPrefetch: () => ipcRenderer.invoke("clean-prefetch"),
   cleanRecycle: () => ipcRenderer.invoke("clean-recycle"),
@@ -18,6 +20,8 @@ contextBridge.exposeInMainWorld("optimizer", {
   cleanNvidia: () => ipcRenderer.invoke("clean-nvidia"),
   cleanAmd: () => ipcRenderer.invoke("clean-amd"),
   deepClean: () => ipcRenderer.invoke("deep-clean"),
+
+  getAppVersion: () => ipcRenderer.invoke("get-app-version"),
 
 installUpdateNow: () => ipcRenderer.invoke("install-update-now"),
 

@@ -1022,3 +1022,179 @@ button:disabled {
   font-weight: 900;
   cursor: pointer;
 }
+
+.profileLicenseBox {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profileAvatarRing {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  padding: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.profileAvatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #050505;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.profileInfo span {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.profileInfo strong {
+  color: var(--accent);
+  font-size: 18px;
+}
+
+.profileInfo small {
+  color: #aaa;
+  margin-top: 4px;
+}
+.accountPremiumCard {
+  margin-top: 34px;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 20%, transparent), transparent 35%),
+    rgba(12, 12, 12, 0.96);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 28px;
+  padding: 34px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  box-shadow: 0 0 28px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.accountAvatarRing {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  padding: 4px;
+  background: conic-gradient(var(--accent), #111, var(--accent));
+  box-shadow: 0 0 25px color-mix(in srgb, var(--accent) 38%, transparent);
+}
+
+.rgbActive .accountAvatarRing,
+.rgbActive .profileAvatarRing {
+  animation: avatarRgbSpin 4s linear infinite;
+}
+
+.accountAvatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #050505;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.accountAvatar span {
+  color: var(--accent);
+  font-size: 52px;
+  font-weight: 900;
+}
+
+.accountAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.accountProfileInfo span {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.accountProfileInfo h2 {
+  margin: 10px 0 6px;
+  color: #fff;
+  font-size: 34px;
+}
+
+.accountProfileInfo p {
+  color: #aaa;
+  margin-bottom: 18px;
+}
+
+.accountBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.accountBadges strong {
+  background: rgba(0, 255, 102, 0.08);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent);
+  padding: 9px 13px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.accountProfileInfo button {
+  border: none;
+  background: var(--accent);
+  color: #000;
+  padding: 14px 22px;
+  border-radius: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+@keyframes avatarRgbSpin {
+  from {
+    filter: hue-rotate(0deg);
+  }
+
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+.accountButtons {
+  display: flex;
+  gap: 12px;
+}
+
+.accountButtons button {
+  min-width: 180px;
+}
+
+.secondaryButton {
+  background: #151515 !important;
+  color: var(--accent) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent) !important;
+}
+
+.profileAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileAvatar {
+  overflow: hidden;
+}

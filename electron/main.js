@@ -20,17 +20,7 @@ let isQuitting = false;
 
 const gotLock = app.requestSingleInstanceLock();
 
-ipcMain.handle("install-update-now", () => {
-  isQuitting = true;
-  stopMonitor();
-
-  if (tray) {
-    tray.destroy();
-    tray = null;
-  }
-
-  installUpdateNow();
-});
+const { connectDiscord } = require("./discord");
 
 if (!gotLock) {
   app.quit();
@@ -211,6 +201,26 @@ ipcMain.handle("window-maximize", () => {
   } else {
     win.maximize();
   }
+});
+
+ipcMain.handle("connect-discord", async () => {
+  return await connectDiscord();
+});
+
+ipcMain.handle("get-app-version", () => {
+  return app.getVersion();
+});
+
+ipcMain.handle("install-update-now", () => {
+  isQuitting = true;
+  stopMonitor();
+
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
+
+  installUpdateNow();
 });
 
 ipcMain.handle("set-monitor-active", (_, active) => {
