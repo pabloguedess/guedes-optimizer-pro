@@ -1,0 +1,73 @@
+{
+  "name": "guedes-optimizer-pro",
+  "version": "2.0.1",
+  "description": "Guedes Optimizer PRO",
+  "main": "electron/main.js",
+  "author": "Pablo Guedes",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
+    "dev:vite": "vite",
+    "dev:electron": "wait-on http://localhost:5173 && electron .",
+    "build": "vite build",
+    "dist": "npm run build && electron-builder --win",
+    "publish": "npm run build && electron-builder --win --publish always"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "electron-updater": "4.0.0",
+    "react": "latest",
+    "react-dom": "latest",
+    "systeminformation": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "concurrently": "latest",
+    "electron": "latest",
+    "electron-builder": "latest",
+    "wait-on": "latest"
+  },
+  "build": {
+    "appId": "com.guedes.optimizerpro",
+    "productName": "Guedes Optimizer PRO",
+    "asar": true,
+    "compression": "maximum",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "pabloguedess",
+        "repo": "guedes-optimizer-pro"
+
+      }
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+   "nsis": {
+  "oneClick": false,
+  "allowToChangeInstallationDirectory": true,
+  "createDesktopShortcut": true,
+  "createStartMenuShortcut": true,
+  "shortcutName": "Guedes Optimizer PRO",
+
+  "installerIcon": "assets/icon.ico",
+  "uninstallerIcon": "assets/icon.ico",
+  "installerHeaderIcon": "assets/icon.ico"
+}
+  }
+}
