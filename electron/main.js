@@ -11,7 +11,7 @@ const network = require("./optimizer/network");
 const gpu = require("./optimizer/gpu");
 const live = require("./optimizer/live");
 const monitor = require("./monitor/systemInfo");
-const { setupAutoUpdater, checkForUpdates } = require("./updater");
+const { setupAutoUpdater, checkForUpdates, installUpdateNow } = require("./updater");
 let win = null;
 let tray = null;
 let monitorTimer = null;
@@ -21,6 +21,14 @@ let isQuitting = false;
 const gotLock = app.requestSingleInstanceLock();
 
 ipcMain.handle("install-update-now", () => {
+  isQuitting = true;
+  stopMonitor();
+
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
+
   installUpdateNow();
 });
 
