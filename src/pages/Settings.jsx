@@ -143,6 +143,27 @@ export default function Settings({
             Automático
           </button>
         </div>
+
+<div className="settingsCard">
+  <h3>Disco monitorado</h3>
+  <p>Escolha qual disco local será exibido no Dashboard.</p>
+
+  <select
+    className="selectInput"
+    defaultValue={localStorage.getItem("selectedDiskMount") || "C:"}
+    onChange={(e) => {
+  localStorage.setItem("selectedDiskMount", e.target.value);
+  window.dispatchEvent(new Event("selected-disk-updated"));
+  notify("Disco monitorado", `Agora o Dashboard exibirá o disco ${e.target.value}`);
+}}
+  >
+    <option value="C:">Disco C:</option>
+    <option value="D:">Disco D:</option>
+    <option value="E:">Disco E:</option>
+    <option value="F:">Disco F:</option>
+  </select>
+</div>
+
       </div>
     </section>
   );

@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import ActionCard from "../components/ActionCard.jsx";
 import GaugeCard from "../components/GaugeCard.jsx";
 import LineChartCard from "../components/LineChartCard.jsx";
+import { useUser } from "../context/UserContext.jsx";
 
 function formatBytes(bytes) {
   if (!bytes) return "--";
@@ -22,48 +24,80 @@ function formatUptime(seconds) {
 }
 
 export default function Dashboard({ running, runAction, systemInfo }) {
+
+const [selectedDiskMount, setSelectedDiskMount] = useState(() => {
+  return localStorage.getItem("selectedDiskMount") || "C:";
+});
+
+useEffect(() => {
+  function updateSelectedDisk() {
+    setSelectedDiskMount(localStorage.getItem("selectedDiskMount") || "C:");
+  }
+
+  window.addEventListener("selected-disk-updated", updateSelectedDisk);
+
+  return () => {
+    window.removeEventListener("selected-disk-updated", updateSelectedDisk);
+  };
+}, []);
+
+
+  const { user } = useUser();
+
   const cpu = systemInfo?.cpu;
   const ram = systemInfo?.ram;
   const gpu = systemInfo?.gpu;
-  const disk = systemInfo?.disk;
+  const disks = systemInfo?.disks || [];
+
+const disk =
+  disks.find((item) => item.mount === selectedDiskMount) ||
+  disks.find((item) => item.mount?.startsWith(selectedDiskMount)) ||
+  disks[0];
   const windows = systemInfo?.windows;
   const network = systemInfo?.network;
 
   return (
-    <section className="premiumDashboard">
-      <div className="premiumHero">
+    <section className="premiumDashboard dashboardV3">
+      <div className="dashboardHeroV3">
         <div>
           <span>GUEDES OPTIMIZER PRO</span>
-          <h1>Dashboard Gamer</h1>
+          <h1>Olá, {user.connected ? user.username : "Pablo"} 👋</h1>
           <p>
             {systemInfo
-              ? `${systemInfo.hostname} • ${systemInfo.username} • Ligado há ${formatUptime(systemInfo.uptime)}`
-              : "Carregando dados do sistema..."}
+              ? `${systemInfo.hostname} • Ligado há ${formatUptime(systemInfo.uptime)}  `
+              : "Carregando informações do computador..."}
           </p>
         </div>
 
-        
+        <div className="dashboardHeroBadge">
+          <strong>{user.plan}</strong>
+          <small>{user.license}</small>
+        </div>
       </div>
 
-      <div className="hardwareStrip">
-        <div>
+      <div className="dashboardStatusGrid">
+        <div className="statusMiniCard">
           <span>Windows</span>
-          <strong>{windows ? `${windows.distro} ${windows.version}` : "--"}</strong>
+          <strong>{windows ? `${windows.distro}` : "--"}</strong>
+          <small>{windows ? `Build ${windows.build}` : "Monitorando..."}</small>
         </div>
 
-        <div>
+        <div className="statusMiniCard">
           <span>CPU</span>
-          <strong>{cpu?.brand || "--"}</strong>
+          <strong>{cpu?.usage ? `${cpu.usage}%` : "--%"}</strong>
+          <small>{cpu?.brand || "Monitorando..."}</small>
         </div>
 
-        <div>
+        <div className="statusMiniCard">
           <span>GPU</span>
-          <strong>{gpu?.model || "--"}</strong>
+          <strong>{gpu?.usage !== undefined ? `${gpu.usage}%` : "--%"}</strong>
+          <small>{gpu?.model || "Monitorando..."}</small>
         </div>
 
-        <div>
-          <span>Disco</span>
-          <strong>{disk ? `${formatBytes(disk.used)} / ${formatBytes(disk.size)}` : "--"}</strong>
+        <div className="statusMiniCard">
+          <span>Internet</span>
+          <strong>{formatSpeed(network?.rx)}</strong>
+          <small>Download atual</small>
         </div>
       </div>
 
@@ -87,38 +121,34 @@ export default function Dashboard({ running, runAction, systemInfo }) {
         />
 
         <GaugeCard
-  title="GPU"
-  value={gpu?.usage || 0}
-  subtitle={
-    gpu
-      ? `${gpu.vendor} • ${gpu.temperature ? gpu.temperature + "°C • " : ""}VRAM ${gpu.vram || "--"} MB`
-      : "Monitorando..."
-  }
-/>
+          title="GPU"
+          value={gpu?.usage || 0}
+          subtitle={gpu ? `${gpu.temperature ? gpu.temperature + "°C • " : ""}VRAM ${gpu.vram || "--"} MB` : "Monitorando..."}
+        />
       </div>
 
       <div className="chartsGrid premiumCharts">
         <LineChartCard title="CPU em tempo real" data={systemInfo?.history?.cpu || []} />
         <LineChartCard title="RAM em tempo real" data={systemInfo?.history?.ram || []} />
         <LineChartCard title="Download" data={systemInfo?.history?.download || []} suffix=" MB/s" />
-        <LineChartCard title="Upload" data={systemInfo?.history?.upload || []} suffix=" MB/s" />
+        <LineChartCard title="GPU em tempo real" data={systemInfo?.history?.gpu || []} />
       </div>
 
-      <div className="networkStrip">
+      <div className="ultraOptimizeCard">
         <div>
-          <span>Download atual</span>
-          <strong>{formatSpeed(network?.rx)}</strong>
+          <span>OTIMIZAÇÃO INTELIGENTE</span>
+          <h2>Ultra Optimize</h2>
+          <p>
+            Executa uma sequência segura de limpeza, RAM, DNS e modo desempenho para preparar o PC para jogos e lives.
+          </p>
         </div>
 
-        <div>
-          <span>Upload atual</span>
-          <strong>{formatSpeed(network?.tx)}</strong>
-        </div>
-
-        <div>
-          <span>VRAM</span>
-          <strong>{gpu?.vram ? `${gpu.vram} MB` : "--"}</strong>
-        </div>
+        <button
+          disabled={running}
+          onClick={() => runAction("Ultra Optimize", window.optimizer.liveMode)}
+        >
+          {running ? "Executando..." : "Ativar Ultra Optimize"}
+        </button>
       </div>
 
       <div className="actionsGrid">

@@ -1,87 +1,60 @@
-import { useEffect, useState } from "react";
+import { useUser } from "../context/UserContext.jsx";
 
 const menu = [
-  { id: "dashboard", label: "Dashboard" },
-  { id: "optimization", label: "Otimização" },
-  { id: "cleaning", label: "Limpeza" },
-  { id: "system", label: "Sistema" },
-  { id: "network", label: "Rede" },
-  { id: "gpu", label: "GPU" },
-  { id: "live", label: "Live Mode" },
-  { id: "account", label: "Conta" },
-  { id: "settings", label: "Configurações" }
+  { id: "dashboard", icon: "🏠", label: "Dashboard" },
+  { id: "optimization", icon: "🚀", label: "Otimização" },
+  { id: "cleaning", icon: "🧹", label: "Limpeza" },
+  { id: "system", icon: "🖥️", label: "Sistema" },
+  { id: "network", icon: "🌐", label: "Rede" },
+  { id: "gpu", icon: "🎮", label: "GPU" },
+  { id: "live", icon: "🔴", label: "Live Mode" },
+  { id: "account", icon: "👤", label: "Conta" },
+  { id: "settings", icon: "⚙️", label: "Configurações" }
 ];
 
-const emptyDiscordUser = {
-  connected: false,
-  username: "Guedes",
-  avatar: null
-};
-
 export default function Sidebar({ activePage, setPage }) {
-  const [version, setVersion] = useState("...");
-  const [discordUser, setDiscordUser] = useState(() => {
-    const saved = localStorage.getItem("discordUser");
-    return saved ? JSON.parse(saved) : emptyDiscordUser;
-  });
-
-  useEffect(() => {
-    window.optimizer.getAppVersion().then(setVersion);
-
-    function updateUser() {
-      const saved = localStorage.getItem("discordUser");
-      setDiscordUser(saved ? JSON.parse(saved) : emptyDiscordUser);
-    }
-
-    window.addEventListener("discord-user-updated", updateUser);
-
-    return () => {
-      window.removeEventListener("discord-user-updated", updateUser);
-    };
-  }, []);
+  const { user } = useUser();
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar sidebarPremium">
       <div>
-        <div className="brand">
-          <div className="brandIcon">G</div>
-
-          <div>
-            <h2>GUEDES</h2>
-            <span>Optimizer PRO</span>
+        <div className="sidebarProfile">
+          <div className="profileAvatarRing bigAvatarRing">
+            <div className="profileAvatar bigAvatar">
+              {user.avatar ? <img src={user.avatar} alt="Avatar Discord" /> : "G"}
+            </div>
           </div>
+
+          <h2>{user.connected ? user.username : "Guedes"}</h2>
+          <p>{user.plan} • {user.license}</p>
+          
         </div>
 
-        <nav className="menuList">
+        <nav className="menuList premiumMenuList">
           {menu.map((item) => (
             <button
               key={item.id}
-              className={activePage === item.id ? "menuButton active" : "menuButton"}
+              className={activePage === item.id ? "menuButton active premiumMenuButton" : "menuButton premiumMenuButton"}
               onClick={() => setPage(item.id)}
             >
-              {item.label}
+              <span className="menuIcon">{item.icon}</span>
+              <span>{item.label}</span>
             </button>
           ))}
         </nav>
       </div>
 
-      <div className="licenseBox profileLicenseBox">
-        <div className="profileAvatarRing">
-          <div className="profileAvatar">
-            {discordUser.avatar ? (
-              <img src={discordUser.avatar} alt="Avatar Discord" />
-            ) : (
-              "G"
-            )}
-          </div>
-        </div>
+      <div className="sidebarFooter">
+        <strong>GUEDES</strong>
 
-        <div className="profileInfo">
-          <span>{discordUser.username}</span>
-          <strong>Premium</strong>
-          <small>Licença ativa</small>
-          <small>Versão {version}</small>
-        </div>
+        <small>Optimizer PRO</small>
+
+        <div className="footerDivider" ></div>
+
+        <span className="sidebarVersion">
+          v{user.version}
+
+          </span> 
       </div>
     </aside>
   );

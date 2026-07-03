@@ -113,14 +113,13 @@ async function getSystemInfo() {
         }
       : null,
 
-    disk: disks.length
-      ? {
-          fs: disks[0].fs,
-          size: disks[0].size,
-          used: disks[0].used,
-          percent: Number(disks[0].use.toFixed(1))
-        }
-      : null,
+   disks: disks.map((item) => ({
+  fs: item.fs,
+  mount: String(item.mount || item.fs || "").replace("\\", ""),
+  size: item.size,
+  used: item.used,
+  percent: Number(item.use.toFixed(1))
+})),
 
     windows: {
       platform: osInfo.platform,

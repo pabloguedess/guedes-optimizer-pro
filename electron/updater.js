@@ -4,13 +4,9 @@ let mainWindow = null;
 let updateReady = false;
 
 const changelog = [
-  "Sistema de atualização mais estável",
-  "Verificação automática ao abrir o app",
-  "Download em segundo plano",
-  "Botão Reiniciar Agora corrigido",
-  "Melhor integração com a interface",
-  "Adição de logs de atualização no painel de controle",
-  "Possivel conexão com Discord para notificações de atualização",
+  "Melhorias no Sidebar e Dashboard",
+  "Correção de bugs e melhorias de desempenho",
+  "Agora é possivel escolher o disco que deseja otimizar e deixar aparecendo no dashboard",
 ];
 
 function send(data) {

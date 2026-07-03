@@ -14,6 +14,7 @@ import GPU from "./pages/GPU.jsx";
 import LiveMode from "./pages/LiveMode.jsx";
 import Account from "./pages/Account.jsx";
 import Settings from "./pages/Settings.jsx";
+import { UserProvider } from "./context/UserContext.jsx";
 
 export default function App() {
   const [page, setPage] = useState("dashboard");
@@ -201,22 +202,24 @@ if (data?.status === "silent-error") return;
     return pages[page] || pages.dashboard;
   }, [page, sharedProps, accentColor, rgbMode, notify]);
 
-  return (
-    <div className={rgbMode ? "appWindow rgbActive" : "appWindow"}>
-      <TitleBar />
+    return (
+    <UserProvider>
+      <div className={rgbMode ? "appWindow rgbActive" : "appWindow"}>
+        <TitleBar />
 
-      <div className="appBody">
-        <Sidebar activePage={page} setPage={setPage} />
+        <div className="appBody">
+          <Sidebar activePage={page} setPage={setPage} />
 
-        <main className="contentArea">
-          <UpdateBanner updateStatus={updateStatus} />
-          {currentPage}
-        </main>
+          <main className="contentArea">
+            <UpdateBanner updateStatus={updateStatus} />
+            {currentPage}
+          </main>
 
-        <StatusPanel status={status} progress={progress} logs={logs} />
+          <StatusPanel status={status} progress={progress} logs={logs} />
+        </div>
+
+        <NotificationToast notifications={notifications} />
       </div>
-
-      <NotificationToast notifications={notifications} />
-    </div>
+    </UserProvider>
   );
 }
