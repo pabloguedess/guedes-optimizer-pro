@@ -51,7 +51,11 @@ function setupAutoUpdater(win) {
     });
 
     try {
-      await autoUpdater.downloadUpdate();
+      setTimeout(() => {
+  autoUpdater.downloadUpdate().catch((err) => {
+    console.log("AUTO UPDATE DOWNLOAD ERROR:", err?.message || err);
+  });
+}, 1000);
     } catch (err) {
       console.log("AUTO UPDATE DOWNLOAD ERROR:", err?.message || err);
     }
