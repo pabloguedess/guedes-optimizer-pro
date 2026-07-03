@@ -1,6 +1,6 @@
 {
   "name": "guedes-optimizer-pro",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Guedes Optimizer PRO",
   "main": "electron/main.js",
   "author": "Pablo Guedes",
@@ -31,7 +31,14 @@
     "productName": "Guedes Optimizer PRO",
     "asar": true,
     "compression": "maximum",
-    "publish": "npm run build && electron-builder --win --publish always",
+    "publish": [
+  {
+    "provider": "github",
+    "owner": "pabloguedess",
+    "repo": "guedes-optimizer-pro"
+  }
+],
+
     "directories": {
       "output": "release",
       "buildResources": "assets"
