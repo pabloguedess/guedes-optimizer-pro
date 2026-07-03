@@ -74,14 +74,16 @@ function setupAutoUpdater(win) {
     });
   });
 
-  autoUpdater.on("error", (err) => {
-    send("update-status", {
-      status: "error",
-      message: err?.message || "Erro ao verificar atualização.",
-      progress: 0,
-      changelog: []
-    });
+ autoUpdater.on("error", (err) => {
+  console.log("ERRO AUTO UPDATE:", err);
+
+  send("update-status", {
+    status: "error",
+    message: err?.message || "Erro ao verificar atualização.",
+    progress: 0,
+    changelog: []
   });
+});
 }
 
 function send(channel, data) {

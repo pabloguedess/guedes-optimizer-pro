@@ -163,7 +163,9 @@ function startMonitor() {
 
       const info = await monitor.getSystemInfo();
       win.webContents.send("system-info", info);
-    } catch {}
+    } catch (err) {
+  console.log("ERRO MONITOR:", err);
+}
   }, 5000);
 }
 

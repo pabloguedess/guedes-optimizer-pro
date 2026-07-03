@@ -24,7 +24,21 @@ jobs:
       - name: Instalar dependências
         run: npm install
 
-      - name: Build e Publish
-        run: npm run publish
+      - name: Build
+        run: npm run build
+
+      - name: Gerar instalador
+        run: npx electron-builder --win --publish never
+
+      - name: Criar Release única
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.exe
+            release/*.blockmap
+            release/latest.yml
+          draft: false
+          prerelease: false
+          generate_release_notes: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
