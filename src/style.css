@@ -963,3 +963,62 @@ button:disabled {
   font-size: 12px;
   margin-bottom: 4px;
 }
+.updateOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.updateModal {
+  width: 440px;
+  background: #080808;
+  border: 1px solid var(--accent);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 0 35px color-mix(in srgb, var(--accent) 30%, transparent);
+  text-align: center;
+}
+
+.updateModal h2 {
+  color: var(--accent);
+  margin: 0;
+  letter-spacing: 2px;
+  font-size: 18px;
+}
+
+.updateModal h3 {
+  margin: 14px 0 8px;
+  font-size: 28px;
+  color: #fff;
+}
+
+.updateModal p {
+  color: #aaa;
+  margin-bottom: 18px;
+}
+
+.modalProgress {
+  width: 100%;
+  margin: 12px 0;
+}
+
+.updateModal span {
+  color: var(--accent);
+  font-weight: 900;
+}
+
+.updateModal button {
+  margin-top: 18px;
+  width: 100%;
+  border: none;
+  background: var(--accent);
+  color: #000;
+  padding: 14px;
+  border-radius: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
