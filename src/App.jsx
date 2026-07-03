@@ -123,18 +123,39 @@ export default function App() {
 
     if (window.optimizer.onUpdateStatus) {
       window.optimizer.onUpdateStatus((data) => {
-        setUpdateStatus(data);
+        setUpdateStatus((prev) => {
+          if (
+            data?.status === "error" &&
+            ["available", "downloading", "ready"].includes(prev?.status)
+          ) {
+            return prev;
+          }
+
+          if (
+            data?.status === "none" &&
+            ["available", "downloading", "ready"].includes(prev?.status)
+          ) {
+            return prev;
+          }
+
+          return data;
+        });
 
         if (data?.status === "available") {
           notify("Atualização", data.message);
         }
 
+        if (data?.status === "downloading") {
+          setStatus("Baixando atualização...");
+        }
+
         if (data?.status === "ready") {
           notify("Atualização pronta", "Reinicie para aplicar a nova versão.");
+          setStatus("Atualização pronta para instalar.");
         }
 
         if (data?.status === "error") {
-          notify("Atualização", data.message);
+          notify("Atualização", data.message || "Erro ao verificar atualização.");
         }
       });
     }
