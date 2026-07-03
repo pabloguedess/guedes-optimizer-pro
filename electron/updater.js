@@ -2,12 +2,14 @@ const { autoUpdater } = require("electron-updater");
 
 let mainWindow = null;
 let updateFound = false;
+let updateReady = false;
+let listenersConfigured = false;
 
 const changelog = [
+  "Correção do download automático da atualização",
   "Correção do aviso duplicado de atualização",
   "Melhoria na estabilidade do Auto Update",
   "Correção do botão Reiniciar Agora",
-  "Melhor tratamento de erro do atualizador",
   "Atualização automática mais confiável"
 ];
 
@@ -20,9 +22,13 @@ function send(channel, data) {
 function setupAutoUpdater(win) {
   mainWindow = win;
   updateFound = false;
+  updateReady = false;
 
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
+
+  if (listenersConfigured) return;
+  listenersConfigured = true;
 
   autoUpdater.on("checking-for-update", () => {
     send("update-status", {
@@ -33,7 +39,7 @@ function setupAutoUpdater(win) {
     });
   });
 
-  autoUpdater.on("update-available", (info) => {
+  autoUpdater.on("update-available", async (info) => {
     updateFound = true;
 
     send("update-status", {
@@ -43,6 +49,12 @@ function setupAutoUpdater(win) {
       progress: 0,
       changelog
     });
+
+    try {
+      await autoUpdater.downloadUpdate();
+    } catch (err) {
+      console.log("AUTO UPDATE DOWNLOAD ERROR:", err?.message || err);
+    }
   });
 
   autoUpdater.on("download-progress", (progress) => {
@@ -58,6 +70,7 @@ function setupAutoUpdater(win) {
 
   autoUpdater.on("update-downloaded", (info) => {
     updateFound = true;
+    updateReady = true;
 
     send("update-status", {
       status: "ready",
@@ -69,7 +82,7 @@ function setupAutoUpdater(win) {
   });
 
   autoUpdater.on("update-not-available", () => {
-    if (updateFound) return;
+    if (updateFound || updateReady) return;
 
     send("update-status", {
       status: "none",
@@ -80,27 +93,29 @@ function setupAutoUpdater(win) {
   });
 
   autoUpdater.on("error", (err) => {
-  console.log("AUTO UPDATE ERROR:", err?.message || err);
+    console.log("AUTO UPDATE ERROR:", err?.message || err);
 
-  if (updateFound) return;
+    if (updateFound || updateReady) return;
 
-  send("update-status", {
-    status: "silent-error",
-    message: "",
-    progress: 0,
-    changelog: []
+    send("update-status", {
+      status: "silent-error",
+      message: "",
+      progress: 0,
+      changelog: []
+    });
   });
-});
 }
 
 function checkForUpdates() {
   try {
     autoUpdater.checkForUpdates();
   } catch (err) {
-    if (!updateFound) {
+    console.log("AUTO UPDATE CHECK ERROR:", err?.message || err);
+
+    if (!updateFound && !updateReady) {
       send("update-status", {
-        status: "error",
-        message: err?.message || "Erro ao verificar atualização.",
+        status: "silent-error",
+        message: "",
         progress: 0,
         changelog: []
       });
@@ -109,6 +124,16 @@ function checkForUpdates() {
 }
 
 function installUpdateNow() {
+  if (!updateReady) {
+    send("update-status", {
+      status: "downloading",
+      message: "A atualização ainda está sendo preparada...",
+      progress: 0,
+      changelog
+    });
+    return;
+  }
+
   autoUpdater.quitAndInstall(false, true);
 }
 
