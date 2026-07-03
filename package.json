@@ -1,6 +1,6 @@
 {
   "name": "guedes-optimizer-pro",
-  "version": "2.0.17",
+  "version": "2.0.18",
   "description": "Guedes Optimizer PRO",
   "main": "electron/main.js",
   "author": "Pablo Guedes",

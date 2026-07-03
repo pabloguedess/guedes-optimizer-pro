@@ -73,10 +73,13 @@ function createWindow() {
     win.loadFile(path.join(__dirname, "..", "dist", "index.html"));
   }
 
-  win.once("ready-to-show", () => {
+win.once("ready-to-show", () => {
   if (app.isPackaged) {
     setupAutoUpdater(win);
-    checkForUpdates();
+
+    setTimeout(() => {
+      checkForUpdates();
+    }, 3000);
   }
 });
 

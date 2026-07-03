@@ -4,10 +4,11 @@ let mainWindow = null;
 let updateReady = false;
 
 const changelog = [
-  "Correção de mensagens duplicadas",
-  "Melhoria na detecção de atualizações",
-  "Correção de bugs e melhorias gerais",
-  "Update silencioso"
+  "Sistema de atualização mais estável",
+  "Verificação automática ao abrir o app",
+  "Download em segundo plano",
+  "Botão Reiniciar Agora corrigido",
+  "Melhor integração com a interface"
 ];
 
 function send(data) {
@@ -78,11 +79,18 @@ function setupAutoUpdater(win) {
 
   autoUpdater.on("error", (err) => {
     console.log("AUTO UPDATE ERROR:", err?.message || err);
+
+    send({
+      status: "silent-error",
+      message: "",
+      progress: 0,
+      changelog: []
+    });
   });
 }
 
 function checkForUpdates() {
-  autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+  autoUpdater.checkForUpdates().catch((err) => {
     console.log("CHECK UPDATE ERROR:", err?.message || err);
   });
 }
