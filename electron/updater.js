@@ -1,22 +1,24 @@
 const { autoUpdater } = require("electron-updater");
-const path = require("path");
+const { app } = require("electron");
 const fs = require("fs");
+const path = require("path");
 
 let mainWindow = null;
 let hasUpdate = false;
 let isDownloaded = false;
 
 const changelog = [
-  "Correção definitiva do Auto Update",
-  "Download automático corrigido",
-  "Botão Reiniciar Agora corrigido",
-  "Remoção de mensagens duplicadas",
-  "Logs de erro do atualizador"
+  "Correção final do sistema de atualização",
+  "Logs salvos em AppData",
+  "Download automático forçado",
+  "Melhor diagnóstico de erro",
+  "Botão Reiniciar Agora corrigido"
 ];
 
 function log(text) {
   try {
-    const file = path.join(process.cwd(), "update-log.txt");
+    const dir = app.getPath("userData");
+    const file = path.join(dir, "update-log.txt");
     fs.appendFileSync(file, `[${new Date().toLocaleString()}] ${text}\n`);
   } catch {}
 }
@@ -34,7 +36,7 @@ function setupAutoUpdater(win) {
 
   autoUpdater.removeAllListeners();
 
-  autoUpdater.autoDownload = true;
+  autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.allowDowngrade = false;
   autoUpdater.allowPrerelease = false;
@@ -52,7 +54,7 @@ function setupAutoUpdater(win) {
 
   autoUpdater.on("update-available", (info) => {
     hasUpdate = true;
-    log(`Atualização disponível: ${info.version}`);
+    log(`Atualização encontrada: ${info.version}`);
 
     send({
       status: "available",
@@ -61,22 +63,37 @@ function setupAutoUpdater(win) {
       progress: 1,
       changelog
     });
+
+    setTimeout(() => {
+      log("Iniciando download manual");
+
+      autoUpdater.downloadUpdate().catch((err) => {
+        const message = err?.message || String(err);
+        log(`Erro no download: ${message}`);
+
+        send({
+          status: "download-error",
+          message: `Erro ao baixar atualização: ${message}`,
+          progress: 0,
+          changelog
+        });
+      });
+    }, 1200);
   });
 
   autoUpdater.on("download-progress", (progress) => {
-    hasUpdate = true;
-    log(`Download: ${Math.round(progress.percent || 0)}%`);
+    const percent = Math.round(progress.percent || 0);
+    log(`Download: ${percent}%`);
 
     send({
       status: "downloading",
       message: "Baixando atualização...",
-      progress: Math.round(progress.percent || 0),
+      progress: percent,
       changelog
     });
   });
 
   autoUpdater.on("update-downloaded", (info) => {
-    hasUpdate = true;
     isDownloaded = true;
     log(`Atualização baixada: ${info.version}`);
 
@@ -104,25 +121,9 @@ function setupAutoUpdater(win) {
 
   autoUpdater.on("error", (err) => {
     const message = err?.message || String(err);
-    log(`ERRO: ${message}`);
+    log(`Erro geral: ${message}`);
 
-    send({
-      status: hasUpdate ? "download-error" : "silent-error",
-      message: hasUpdate
-        ? `Erro ao baixar atualização: ${message}`
-        : "",
-      progress: 0,
-      changelog: hasUpdate ? changelog : []
-    });
-  });
-}
-
-function checkForUpdates() {
-  log("checkForUpdates chamado");
-
-  autoUpdater.checkForUpdates().catch((err) => {
-    const message = err?.message || String(err);
-    log(`CHECK ERROR: ${message}`);
+    if (hasUpdate || isDownloaded) return;
 
     send({
       status: "silent-error",
@@ -133,13 +134,21 @@ function checkForUpdates() {
   });
 }
 
+function checkForUpdates() {
+  log("checkForUpdates chamado");
+
+  autoUpdater.checkForUpdates().catch((err) => {
+    log(`Erro ao verificar: ${err?.message || err}`);
+  });
+}
+
 function installUpdateNow() {
   log("installUpdateNow chamado");
 
   if (!isDownloaded) {
     send({
       status: "downloading",
-      message: "A atualização ainda não terminou de baixar...",
+      message: "A atualização ainda está sendo baixada...",
       progress: 1,
       changelog
     });
