@@ -1,4 +1,6 @@
 const { autoUpdater } = require("electron-updater");
+const path = require("path");
+const fs = require("fs");
 
 let mainWindow = null;
 let hasUpdate = false;
@@ -6,11 +8,18 @@ let isDownloaded = false;
 
 const changelog = [
   "Correção definitiva do Auto Update",
-  "Download automático após encontrar nova versão",
+  "Download automático corrigido",
   "Botão Reiniciar Agora corrigido",
   "Remoção de mensagens duplicadas",
-  "Atualizador mais estável"
+  "Logs de erro do atualizador"
 ];
+
+function log(text) {
+  try {
+    const file = path.join(process.cwd(), "update-log.txt");
+    fs.appendFileSync(file, `[${new Date().toLocaleString()}] ${text}\n`);
+  } catch {}
+}
 
 function send(data) {
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -20,15 +29,18 @@ function send(data) {
 
 function setupAutoUpdater(win) {
   mainWindow = win;
-
-  autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = true;
+  hasUpdate = false;
+  isDownloaded = false;
 
   autoUpdater.removeAllListeners();
 
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.allowDowngrade = false;
+  autoUpdater.allowPrerelease = false;
+
   autoUpdater.on("checking-for-update", () => {
-    hasUpdate = false;
-    isDownloaded = false;
+    log("Verificando atualização");
 
     send({
       status: "checking",
@@ -38,35 +50,23 @@ function setupAutoUpdater(win) {
     });
   });
 
-  autoUpdater.on("update-available", async (info) => {
+  autoUpdater.on("update-available", (info) => {
     hasUpdate = true;
+    log(`Atualização disponível: ${info.version}`);
 
     send({
       status: "available",
       message: `Nova versão disponível: ${info.version}`,
       version: info.version,
-      progress: 0,
+      progress: 1,
       changelog
     });
-
-    setTimeout(async () => {
-      try {
-        send({
-          status: "downloading",
-          message: "Baixando atualização...",
-          version: info.version,
-          progress: 1,
-          changelog
-        });
-
-        await autoUpdater.downloadUpdate();
-      } catch (err) {
-        console.log("DOWNLOAD UPDATE ERROR:", err?.message || err);
-      }
-    }, 1000);
   });
 
   autoUpdater.on("download-progress", (progress) => {
+    hasUpdate = true;
+    log(`Download: ${Math.round(progress.percent || 0)}%`);
+
     send({
       status: "downloading",
       message: "Baixando atualização...",
@@ -76,7 +76,9 @@ function setupAutoUpdater(win) {
   });
 
   autoUpdater.on("update-downloaded", (info) => {
+    hasUpdate = true;
     isDownloaded = true;
+    log(`Atualização baixada: ${info.version}`);
 
     send({
       status: "ready",
@@ -88,6 +90,8 @@ function setupAutoUpdater(win) {
   });
 
   autoUpdater.on("update-not-available", () => {
+    log("Nenhuma atualização disponível");
+
     if (hasUpdate || isDownloaded) return;
 
     send({
@@ -99,9 +103,26 @@ function setupAutoUpdater(win) {
   });
 
   autoUpdater.on("error", (err) => {
-    console.log("AUTO UPDATE ERROR:", err?.message || err);
+    const message = err?.message || String(err);
+    log(`ERRO: ${message}`);
 
-    if (hasUpdate || isDownloaded) return;
+    send({
+      status: hasUpdate ? "download-error" : "silent-error",
+      message: hasUpdate
+        ? `Erro ao baixar atualização: ${message}`
+        : "",
+      progress: 0,
+      changelog: hasUpdate ? changelog : []
+    });
+  });
+}
+
+function checkForUpdates() {
+  log("checkForUpdates chamado");
+
+  autoUpdater.checkForUpdates().catch((err) => {
+    const message = err?.message || String(err);
+    log(`CHECK ERROR: ${message}`);
 
     send({
       status: "silent-error",
@@ -112,17 +133,13 @@ function setupAutoUpdater(win) {
   });
 }
 
-function checkForUpdates() {
-  autoUpdater.checkForUpdates().catch((err) => {
-    console.log("CHECK UPDATE ERROR:", err?.message || err);
-  });
-}
-
 function installUpdateNow() {
+  log("installUpdateNow chamado");
+
   if (!isDownloaded) {
     send({
       status: "downloading",
-      message: "A atualização ainda está sendo baixada...",
+      message: "A atualização ainda não terminou de baixar...",
       progress: 1,
       changelog
     });
