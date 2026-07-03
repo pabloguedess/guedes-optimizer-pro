@@ -80,15 +80,17 @@ function setupAutoUpdater(win) {
   });
 
   autoUpdater.on("error", (err) => {
-    if (updateFound) return;
+  console.log("AUTO UPDATE ERROR:", err?.message || err);
 
-    send("update-status", {
-      status: "error",
-      message: err?.message || "Erro ao verificar atualização.",
-      progress: 0,
-      changelog: []
-    });
+  if (updateFound) return;
+
+  send("update-status", {
+    status: "silent-error",
+    message: "",
+    progress: 0,
+    changelog: []
   });
+});
 }
 
 function checkForUpdates() {

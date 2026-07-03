@@ -124,6 +124,9 @@ export default function App() {
     if (window.optimizer.onUpdateStatus) {
       window.optimizer.onUpdateStatus((data) => {
         setUpdateStatus((prev) => {
+
+if (data?.status === "silent-error") return;
+
           if (
             data?.status === "error" &&
             ["available", "downloading", "ready"].includes(prev?.status)

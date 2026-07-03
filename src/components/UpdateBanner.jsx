@@ -1,5 +1,12 @@
 export default function UpdateBanner({ updateStatus }) {
-  if (!updateStatus || updateStatus.status === "none") return null;
+  if (
+  !updateStatus ||
+  updateStatus.status === "none" ||
+  updateStatus.status === "silent-error" ||
+  updateStatus.status === "error"
+) {
+  return null;
+}
 
   const showButton = updateStatus.status === "ready";
   const hasChangelog = updateStatus.changelog && updateStatus.changelog.length > 0;
