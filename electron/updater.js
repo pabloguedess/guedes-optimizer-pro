@@ -1,37 +1,36 @@
 const { autoUpdater } = require("electron-updater");
 
 let mainWindow = null;
-let updateFound = false;
-let updateReady = false;
-let listenersConfigured = false;
+let hasUpdate = false;
+let isDownloaded = false;
 
 const changelog = [
-  "Correção do download automático da atualização",
-  "Correção do aviso duplicado de atualização",
-  "Melhoria na estabilidade do Auto Update",
-  "Correção do botão Reiniciar Agora",
-  "Atualização automática mais confiável"
+  "Correção definitiva do Auto Update",
+  "Download automático após encontrar nova versão",
+  "Botão Reiniciar Agora corrigido",
+  "Remoção de mensagens duplicadas",
+  "Atualizador mais estável"
 ];
 
-function send(channel, data) {
+function send(data) {
   if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send(channel, data);
+    mainWindow.webContents.send("update-status", data);
   }
 }
 
 function setupAutoUpdater(win) {
   mainWindow = win;
-  updateFound = false;
-  updateReady = false;
 
-  autoUpdater.autoDownload = true;
+  autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
 
-  if (listenersConfigured) return;
-  listenersConfigured = true;
+  autoUpdater.removeAllListeners();
 
   autoUpdater.on("checking-for-update", () => {
-    send("update-status", {
+    hasUpdate = false;
+    isDownloaded = false;
+
+    send({
       status: "checking",
       message: "Verificando atualizações...",
       progress: 0,
@@ -40,9 +39,9 @@ function setupAutoUpdater(win) {
   });
 
   autoUpdater.on("update-available", async (info) => {
-    updateFound = true;
+    hasUpdate = true;
 
-    send("update-status", {
+    send({
       status: "available",
       message: `Nova versão disponível: ${info.version}`,
       version: info.version,
@@ -50,21 +49,25 @@ function setupAutoUpdater(win) {
       changelog
     });
 
-    try {
-      setTimeout(() => {
-  autoUpdater.downloadUpdate().catch((err) => {
-    console.log("AUTO UPDATE DOWNLOAD ERROR:", err?.message || err);
-  });
-}, 1000);
-    } catch (err) {
-      console.log("AUTO UPDATE DOWNLOAD ERROR:", err?.message || err);
-    }
+    setTimeout(async () => {
+      try {
+        send({
+          status: "downloading",
+          message: "Baixando atualização...",
+          version: info.version,
+          progress: 1,
+          changelog
+        });
+
+        await autoUpdater.downloadUpdate();
+      } catch (err) {
+        console.log("DOWNLOAD UPDATE ERROR:", err?.message || err);
+      }
+    }, 1000);
   });
 
   autoUpdater.on("download-progress", (progress) => {
-    updateFound = true;
-
-    send("update-status", {
+    send({
       status: "downloading",
       message: "Baixando atualização...",
       progress: Math.round(progress.percent || 0),
@@ -73,10 +76,9 @@ function setupAutoUpdater(win) {
   });
 
   autoUpdater.on("update-downloaded", (info) => {
-    updateFound = true;
-    updateReady = true;
+    isDownloaded = true;
 
-    send("update-status", {
+    send({
       status: "ready",
       message: `Atualização ${info.version} pronta para instalar.`,
       version: info.version,
@@ -86,9 +88,9 @@ function setupAutoUpdater(win) {
   });
 
   autoUpdater.on("update-not-available", () => {
-    if (updateFound || updateReady) return;
+    if (hasUpdate || isDownloaded) return;
 
-    send("update-status", {
+    send({
       status: "none",
       message: "Você já está na versão mais recente.",
       progress: 100,
@@ -99,9 +101,9 @@ function setupAutoUpdater(win) {
   autoUpdater.on("error", (err) => {
     console.log("AUTO UPDATE ERROR:", err?.message || err);
 
-    if (updateFound || updateReady) return;
+    if (hasUpdate || isDownloaded) return;
 
-    send("update-status", {
+    send({
       status: "silent-error",
       message: "",
       progress: 0,
@@ -111,30 +113,20 @@ function setupAutoUpdater(win) {
 }
 
 function checkForUpdates() {
-  try {
-    autoUpdater.checkForUpdates();
-  } catch (err) {
-    console.log("AUTO UPDATE CHECK ERROR:", err?.message || err);
-
-    if (!updateFound && !updateReady) {
-      send("update-status", {
-        status: "silent-error",
-        message: "",
-        progress: 0,
-        changelog: []
-      });
-    }
-  }
+  autoUpdater.checkForUpdates().catch((err) => {
+    console.log("CHECK UPDATE ERROR:", err?.message || err);
+  });
 }
 
 function installUpdateNow() {
-  if (!updateReady) {
-    send("update-status", {
+  if (!isDownloaded) {
+    send({
       status: "downloading",
-      message: "A atualização ainda está sendo preparada...",
-      progress: 0,
+      message: "A atualização ainda está sendo baixada...",
+      progress: 1,
       changelog
     });
+
     return;
   }
 
