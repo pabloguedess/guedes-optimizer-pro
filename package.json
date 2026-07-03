@@ -1,6 +1,6 @@
 {
   "name": "guedes-optimizer-pro",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "description": "Guedes Optimizer PRO",
   "main": "electron/main.js",
   "author": "Pablo Guedes",
@@ -59,16 +59,18 @@
         }
       ]
     },
-   "nsis": {
-  "oneClick": false,
+ "nsis": {
+  "oneClick": true,
+  "perMachine": false,
   "allowToChangeInstallationDirectory": true,
   "createDesktopShortcut": true,
   "createStartMenuShortcut": true,
   "shortcutName": "Guedes Optimizer PRO",
-
   "installerIcon": "assets/icon.ico",
   "uninstallerIcon": "assets/icon.ico",
-  "installerHeaderIcon": "assets/icon.ico"
+  "installerHeaderIcon": "assets/icon.ico",
+  "installerSidebar": "assets/installer-sidebar.bmp",
+  "installerHeader": "assets/installer-header.bmp"
 }
   }
 }

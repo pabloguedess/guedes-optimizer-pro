@@ -4,10 +4,10 @@ let mainWindow = null;
 let updateReady = false;
 
 const changelog = [
-  "Correção definitiva do botão Reiniciar Agora",
-  "Download automático restaurado",
-  "Auto Update mais estável",
-  "Correção de mensagens duplicadas"
+  "Correção de mensagens duplicadas",
+  "Melhoria na detecção de atualizações",
+  "Correção de bugs e melhorias gerais",
+  "Update silencioso"
 ];
 
 function send(data) {
